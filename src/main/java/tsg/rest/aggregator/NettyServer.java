@@ -34,7 +34,7 @@ public class NettyServer {
                         public void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(new HttpRequestDecoder(),
                                     new HttpRequestEncoder(),
-                                    new NettyControllerHander());
+                                    new DashboardHandler());
                             // ostatni parametr jeśli dobrze rozumiem, to będzie klasa na kontroler
                             // pytanie co jeśli ja chcę mieć 3 kontrolery
                         }
