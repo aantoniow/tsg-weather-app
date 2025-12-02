@@ -18,9 +18,9 @@ public class NettyServer {
     private final int port;
     private final ApiAggregator aggregator;
 
-    public NettyServer(int port, ApiAggregator aggregator) {
+    public NettyServer(int port) {
         this.port = port;
-        this.aggregator = aggregator;
+        this.aggregator = ApiAggregator.getInstance();
     }
 
     void run() throws Exception {
@@ -60,7 +60,6 @@ public class NettyServer {
 
     public static void main(String[] args) throws Exception {
         int port = 8080;
-        ApiAggregator aggregator = new ApiAggregator(); // tylko jeden egzemplarz dla całej aplikacji
-        new NettyServer(port, aggregator).run();
+        new NettyServer(port).run();
     }
 }

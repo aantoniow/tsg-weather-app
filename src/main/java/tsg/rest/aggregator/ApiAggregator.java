@@ -13,7 +13,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
-public class ApiAggregator {
+public final class ApiAggregator {
     private static final String WEATHER_URL = "https://api.open-meteo.com/v1/forecast?latitude=51.107883&longitude=17.038538&current_weather=true";
     private static final String RANDOM_FACT_URL = "https://uselessfacts.jsph.pl/api/v2/facts/random";
     private static final String IP_URL = "https://api.ipify.org/?format=json";
@@ -23,7 +23,16 @@ public class ApiAggregator {
     private final RedisCache redisCache;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public ApiAggregator() {
+    private static ApiAggregator INSTANCE;
+
+    public static ApiAggregator getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ApiAggregator();
+        }
+        return INSTANCE;
+    }
+
+    private ApiAggregator() {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(timeoutLimit)
                 .build();
@@ -141,7 +150,8 @@ public class ApiAggregator {
     public void close() {
         try {
             redisCache.close();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         // HttpClient nie wymaga zamykania
     }
 
