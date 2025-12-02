@@ -14,7 +14,11 @@ import io.netty.util.CharsetUtil;
 
 public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    public final ApiAggregator aggregator = new ApiAggregator();
+    public final ApiAggregator aggregator;
+
+    public DashboardHandler(ApiAggregator aggregator) {
+        this.aggregator = aggregator;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, FullHttpRequest request) throws Exception {
@@ -26,11 +30,14 @@ public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpReques
         // Launch async aggregation without blocking
         aggregator.aggregateData()
                 .whenComplete((result, throwable) -> {
-                    if (throwable != null) {
-                        sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR, "Error: " + throwable.getMessage());
-                    } else {
-                        sendResponse(context, HttpResponseStatus.OK, (String) result);
-                    }
+                    context.executor().execute(() -> {
+                        if (throwable != null) {
+                            sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                                    "{\"error\":\"" + throwable.getMessage() + "\"}");
+                        } else {
+                            sendResponse(context, HttpResponseStatus.OK, result);
+                        }
+                    });
                 });
     }
 

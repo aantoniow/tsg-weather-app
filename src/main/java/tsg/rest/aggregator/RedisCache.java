@@ -15,14 +15,17 @@ public class RedisCache {
         RedisAsyncCommands<String, String> commands = connection.async();
         return commands.set(key, value)
                 .thenCompose(ok -> commands.expire(key, expirationSeconds))
-                .thenAccept(expired -> {})
+                .thenAccept(expired -> {
+                })
                 .toCompletableFuture();
-
     }
 
     public CompletableFuture<String> getCachedData(String key) {
         RedisAsyncCommands<String, String> commands = connection.async();
         return commands.get(key).toCompletableFuture();
+    }
 
+    public void close() {
+        config.close();
     }
 }
