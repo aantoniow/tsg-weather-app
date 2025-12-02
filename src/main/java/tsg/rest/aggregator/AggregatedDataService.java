@@ -14,19 +14,9 @@ public final class AggregatedDataService {
     private final RestController restController;
     private final RedisCache redisCache;
 
-    private static AggregatedDataService INSTANCE;
-
-    public static AggregatedDataService getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new AggregatedDataService();
-        }
-
-        return INSTANCE;
-    }
-
-    private AggregatedDataService() {
-        this.restController = RestController.getInstance();
-        this.redisCache = null;
+    public AggregatedDataService(RestController restController, RedisCache redisCache) {
+        this.restController = restController;
+        this.redisCache = redisCache;
     }
 
     public String getAggregatedResponse() {

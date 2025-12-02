@@ -12,14 +12,17 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import tsg.rest.controller.RestController;
 import tsg.rest.handler.DashboardHandler;
 
 public class NettyServer {
 
     private final int port;
+    private final AggregatedDataService aggregatedDataService;
 
-    public NettyServer(int port) {
+    public NettyServer(int port, AggregatedDataService aggregatedDataService) {
         this.port = port;
+        this.aggregatedDataService = aggregatedDataService;
     }
 
     void run() throws Exception {
@@ -39,7 +42,7 @@ public class NettyServer {
                                     new HttpServerExpectContinueHandler(),
                                     new HttpObjectAggregator(64 * 1024),
                                     new HttpContentCompressor(),
-                                    new DashboardHandler());
+                                    new DashboardHandler(aggregatedDataService));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
@@ -59,6 +62,6 @@ public class NettyServer {
 
     public static void main(String[] args) throws Exception {
         int port = 8080;
-        new NettyServer(port).run();
+        new NettyServer(port, new AggregatedDataService(RestController.getInstance(), RedisCache.getInstance())).run();
     }
 }

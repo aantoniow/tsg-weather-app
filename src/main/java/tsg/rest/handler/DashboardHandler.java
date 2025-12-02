@@ -12,13 +12,15 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 import tsg.rest.aggregator.AggregatedDataService;
+import tsg.rest.aggregator.RedisCache;
+import tsg.rest.controller.RestController;
 
 public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private final AggregatedDataService aggregatedDataService;
 
-    public DashboardHandler() {
-        this.aggregatedDataService =AggregatedDataService.getInstance();
+    public DashboardHandler(AggregatedDataService aggregatedDataService) {
+        this.aggregatedDataService = aggregatedDataService;
     }
 
     @Override
