@@ -14,7 +14,6 @@ public class RedisConfig {
         return connection;
     }
 
-    // private final RedisAsyncCommands<String, String> commands;
     private final Duration timeoutLimit = Duration.ofSeconds(5);
 
     public RedisConfig() {
@@ -26,6 +25,5 @@ public class RedisConfig {
 
         this.redisClient = RedisClient.create(uri);
         this.connection = redisClient.connect();
-        // this.commands = connection.async();
     }
 }
