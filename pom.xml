@@ -4,12 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>tsg.rest.aggregator</groupId>
-  <artifactId>tsg-fun-weather-app</artifactId>
+  <artifactId>tsg-weather-app</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>tsg-fun-weather-app</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <name>tsg-weather-app</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
