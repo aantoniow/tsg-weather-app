@@ -16,16 +16,14 @@ import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 public class NettyServer {
 
     private final int port;
-    private final ApiAggregator aggregator;
+    private final AggregateService aggregateService;
 
     public NettyServer(int port) {
         this.port = port;
-        this.aggregator = ApiAggregator.getInstance();
+        this.aggregateService = new AggregateService();
     }
 
     void run() throws Exception {
-        // konfiguracja grup wątków: bossGroup do akceptowania połączeń, workerGroup do
-        // obsługi
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -40,17 +38,16 @@ public class NettyServer {
                                     new HttpServerExpectContinueHandler(),
                                     new HttpObjectAggregator(64 * 1024),
                                     new HttpContentCompressor(),
-                                    new DashboardHandler(aggregator));
+                                    new DashboardHandler(aggregateService));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            // bind i start servera
             ChannelFuture f = bootstrap.bind(port).sync();
             System.out.println("Netty server initialised on port " + port);
 
-            // czekaj na zamknięcie serwera
+            // w8 server for server closeed
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

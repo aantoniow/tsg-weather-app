@@ -29,16 +29,6 @@ public class RedisConfig {
         return connection;
     }
 
-    public void close() {
-        try {
-            if (connection != null)
-                connection.close();
-        } finally {
-            if (redisClient != null)
-                redisClient.shutdown();
-        }
-    }
-
     private final Duration timeoutLimit = Duration.ofSeconds(5);
 
 }
