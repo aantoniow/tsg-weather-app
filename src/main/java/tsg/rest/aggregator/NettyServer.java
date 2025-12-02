@@ -12,15 +12,14 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import tsg.rest.handler.DashboardHandler;
 
 public class NettyServer {
 
     private final int port;
-    private final ApiAggregator aggregator;
 
     public NettyServer(int port) {
         this.port = port;
-        this.aggregator = ApiAggregator.getInstance();
     }
 
     void run() throws Exception {
@@ -40,7 +39,7 @@ public class NettyServer {
                                     new HttpServerExpectContinueHandler(),
                                     new HttpObjectAggregator(64 * 1024),
                                     new HttpContentCompressor(),
-                                    new DashboardHandler(aggregator));
+                                    new DashboardHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)

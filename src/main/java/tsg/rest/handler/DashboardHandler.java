@@ -1,4 +1,4 @@
-package tsg.rest.aggregator;
+package tsg.rest.handler;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -11,34 +11,29 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
+import tsg.rest.aggregator.AggregatedDataService;
 
 public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    public final ApiAggregator aggregator;
+    private final AggregatedDataService aggregatedDataService;
 
-    public DashboardHandler(ApiAggregator aggregator) {
-        this.aggregator = aggregator;
+    public DashboardHandler() {
+        this.aggregatedDataService =AggregatedDataService.getInstance();
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, FullHttpRequest request) throws Exception {
         if (!request.uri().equals("/api/dashboard") || !request.method().equals(HttpMethod.GET)) {
+            Thread.sleep(10000);
             sendResponse(context, HttpResponseStatus.NOT_FOUND, "Not Found");
             return;
         }
 
-        // Launch async aggregation without blocking
-        aggregator.aggregateData()
-                .whenComplete((result, throwable) -> {
-                    context.executor().execute(() -> {
-                        if (throwable != null) {
-                            sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                                    "{\"error\":\"" + throwable.getMessage() + "\"}");
-                        } else {
-                            sendResponse(context, HttpResponseStatus.OK, result);
-                        }
-                    });
-                });
+        context.executor().execute(() -> {
+            String response = aggregatedDataService.getAggregatedResponse();
+            sendResponse(context, HttpResponseStatus.OK, response);
+        });
+
     }
 
     private void sendResponse(ChannelHandlerContext context, HttpResponseStatus status, String content) {
