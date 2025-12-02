@@ -32,12 +32,12 @@
     <dependency>
       <groupId>io.lettuce</groupId>
       <artifactId>lettuce-core</artifactId>
-      <version>6.1.10.RELEASE</version>
+      <version>7.1.0.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
-      <version>4.1.10.Final</version>
+      <version>4.2.7.Final</version>
     </dependency>
     <dependency>
       <groupId>tools.jackson.core</groupId>
@@ -101,5 +101,39 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>  <!-- Dodane: Aktywne pluginy dla build -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.7.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>tsg.rest.aggregator.NettyServer</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>  <!-- Pakuje deps do JAR -->
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+              <source>21</source>
+              <target>21</target>
+          </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>

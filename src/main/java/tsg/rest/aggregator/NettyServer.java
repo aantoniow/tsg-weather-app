@@ -8,8 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpRequestEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
 
 public class NettyServer {
 
@@ -32,11 +31,8 @@ public class NettyServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new HttpRequestDecoder(),
-                                    new HttpRequestEncoder(),
+                            ch.pipeline().addLast(new HttpServerCodec(),
                                     new DashboardHandler());
-                            // ostatni parametr jeśli dobrze rozumiem, to będzie klasa na "kontroler"
-                            // pytanie co jeśli ja chcę mieć 3 kontrolery
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
