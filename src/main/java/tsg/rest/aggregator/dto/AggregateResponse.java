@@ -1,8 +1,10 @@
 package tsg.rest.aggregator.dto;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+
 public record AggregateResponse(
-        String weather,
-        String fact,
-        String ip
+        @JsonRawValue String weather,
+        @JsonRawValue String fact,
+        @JsonRawValue String ip
 ) {
 }

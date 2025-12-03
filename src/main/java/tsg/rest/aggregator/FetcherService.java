@@ -35,6 +35,7 @@ public class FetcherService {
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
+                .thenApply(body -> JsonUtils.toJson(KEY, body))
                 .thenCompose(body -> {
                     CompletableFuture.runAsync(() -> redisCache.cacheData(KEY, body));
                     return CompletableFuture.completedFuture(body);
