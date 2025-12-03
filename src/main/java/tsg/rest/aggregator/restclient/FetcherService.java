@@ -15,44 +15,42 @@ import tsg.rest.aggregator.redis.RedisCacheService;
 
 public class FetcherService {
     private static final Logger log = LoggerFactory.getLogger(FetcherService.class);
-    private final String KEY;
-    private String URL;
     private final Duration TIMEOUT = Duration.ofSeconds(3);
 
     private final RedisCacheService redisCache;
     private final HttpClient httpClient;
 
-    public FetcherService(String key, String url) {
+    public FetcherService() {
         this.httpClient = HttpClient.newHttpClient();
         this.redisCache = new RedisCacheService();
-        this.KEY = key;
-        this.URL = url;
     }
 
-    public CompletableFuture<String> fetchSingle() {
+    public CompletableFuture<String> fetchSingle(Endpoints endpoint) {
+        String url = endpoint.url();
+        String key = endpoint.key();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL))
+                .uri(URI.create(url))
                 .timeout(TIMEOUT)
                 .GET()
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenApply(body -> JsonUtils.toJson(KEY, body))
+                .thenApply(body -> JsonUtils.toJson(key, body))
                 .thenCompose(json -> {
-                    CompletableFuture.runAsync(() -> redisCache.cacheData(KEY, json));
+                    CompletableFuture.runAsync(() -> redisCache.cacheData(key, json));
                     return CompletableFuture.completedFuture(json);
                 })
                 .exceptionally(throwable -> {
-                    log.warn("Upstream failed for {}, falling back to cache", KEY, throwable);
-                    String cached = redisCache.getCachedData(KEY).join();
+                    log.warn("Upstream failed for {}, falling back to cache", key, throwable);
+                    String cached = redisCache.getCachedData(key).join();
 
                     if (cached != null && !cached.isBlank()) {
-                        log.debug("Returning cached data for {}", KEY);
+                        log.debug("Returning cached data for {}", key);
                         return cached;
                     } else {
-                        log.warn("No cached data for {}", KEY);
-                        return JsonUtils.errorJson(KEY, throwable.getMessage());
+                        log.warn("No cached data for {}", key);
+                        return JsonUtils.errorJson(key, throwable.getMessage());
                     }
                 });
     }

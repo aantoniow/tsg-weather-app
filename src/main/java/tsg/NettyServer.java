@@ -18,6 +18,7 @@ import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 
 import tsg.rest.aggregator.AggregateService;
 import tsg.rest.aggregator.DashboardHandler;
+import tsg.rest.aggregator.restclient.FetcherService;
 
 public class NettyServer {
 
@@ -26,8 +27,9 @@ public class NettyServer {
     private final AggregateService aggregateService;
 
     public NettyServer(int port) {
+        FetcherService fetcherService = new FetcherService();
         this.port = port;
-        this.aggregateService = new AggregateService();
+        this.aggregateService = new AggregateService(fetcherService);
     }
 
     void run() throws Exception {
