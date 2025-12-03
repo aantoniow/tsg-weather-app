@@ -1,4 +1,4 @@
-package tsg.rest.aggregator;
+package tsg;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -12,6 +12,9 @@ import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+
+import tsg.rest.aggregator.AggregateService;
+import tsg.rest.aggregator.DashboardHandler;
 
 public class NettyServer {
 

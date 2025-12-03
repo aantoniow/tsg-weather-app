@@ -127,7 +127,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>tsg.rest.aggregator.NettyServer</mainClass>
+              <mainClass>tsg.NettyServer</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

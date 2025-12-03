@@ -1,5 +1,8 @@
 package tsg.rest.aggregator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,10 +15,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import tools.jackson.databind.ObjectMapper;
+import tsg.rest.aggregator.restclient.WebPath;
 
 public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final Logger log = LoggerFactory.getLogger(DashboardHandler.class);
@@ -32,19 +33,6 @@ public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpReques
             sendResponse(context, HttpResponseStatus.NOT_FOUND, "Not Found");
             return;
         }
-
-        // Launch async aggregation without blocking
-//        aggregator.aggregateData()
-//                .whenComplete((result, throwable) -> {
-//                    context.executor().execute(() -> {
-//                        if (throwable != null) {
-//                            sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR,
-//                                    "{\"error\":\"" + throwable.getMessage() + "\"}");
-//                        } else {
-//                            sendResponse(context, HttpResponseStatus.OK, result);
-//                        }
-//                    });
-//                });
 
         aggregateService.getAggregatedData()
                 .thenAccept(aggregate -> {

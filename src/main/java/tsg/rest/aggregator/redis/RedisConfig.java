@@ -1,4 +1,4 @@
-package tsg.rest.aggregator;
+package tsg.rest.aggregator.redis;
 
 import java.time.Duration;
 

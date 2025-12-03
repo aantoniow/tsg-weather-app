@@ -3,6 +3,7 @@ package tsg.rest.aggregator;
 import java.util.concurrent.CompletableFuture;
 
 import tsg.rest.aggregator.dto.AggregateResponse;
+import tsg.rest.aggregator.restclient.FetcherService;
 
 public class AggregateService {
 
