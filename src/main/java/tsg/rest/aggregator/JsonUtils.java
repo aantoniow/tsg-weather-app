@@ -15,9 +15,16 @@ public class JsonUtils {
             wrapper.set(key, parsed);
             return mapper.writeValueAsString(wrapper);
         } catch (JsonNodeException e) {
-            return String.format("{\"%s\":{\"error\":\"serialization failed\",\"message\":\"%s\"}}",
-                    key, e.getMessage().replace("\"", "\\\""));
+            return errorJson(key, rawBody);
         }
+    }
+
+    public static String errorJson(String key, String message) {
+        return mapper.writeValueAsString(mapper.createObjectNode()
+                .set(key, mapper.createObjectNode()
+                        .put("error", "failed to parse upstream response")
+                        .put("raw_preview", message == null ? "null"
+                                : message.length() > 500 ? message.substring(0, 500) + "..." : message)));
     }
 
 }

@@ -1,5 +1,8 @@
 package tsg;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -18,6 +21,7 @@ import tsg.rest.aggregator.DashboardHandler;
 
 public class NettyServer {
 
+    private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
     private final int port;
     private final AggregateService aggregateService;
 
@@ -48,7 +52,7 @@ public class NettyServer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             ChannelFuture f = bootstrap.bind(port).sync();
-            System.out.println("Netty server initialised on port " + port);
+            log.debug("Netty server initialised on port {}", port);
 
             // w8 server for server closeed
             f.channel().closeFuture().sync();

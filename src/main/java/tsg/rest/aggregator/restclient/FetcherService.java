@@ -16,7 +16,7 @@ import tsg.rest.aggregator.redis.RedisCacheService;
 public class FetcherService {
     private static final Logger log = LoggerFactory.getLogger(FetcherService.class);
     private final String KEY;
-    private final String URL;
+    private String URL;
     private final Duration TIMEOUT = Duration.ofSeconds(3);
 
     private final RedisCacheService redisCache;
@@ -39,13 +39,21 @@ public class FetcherService {
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .thenApply(body -> JsonUtils.toJson(KEY, body))
-                .thenCompose(body -> {
-                    CompletableFuture.runAsync(() -> redisCache.cacheData(KEY, body));
-                    return CompletableFuture.completedFuture(body);
+                .thenCompose(json -> {
+                    CompletableFuture.runAsync(() -> redisCache.cacheData(KEY, json));
+                    return CompletableFuture.completedFuture(json);
                 })
-                .exceptionally(e -> {
-                    log.warn("Error reading cache, value");
-                    return String.valueOf(CompletableFuture.supplyAsync(() -> redisCache.getCachedData(KEY)));
+                .exceptionally(throwable -> {
+                    log.warn("Upstream failed for {}, falling back to cache", KEY, throwable);
+                    String cached = redisCache.getCachedData(KEY).join();
+
+                    if (cached != null && !cached.isBlank()) {
+                        log.debug("Returning cached data for {}", KEY);
+                        return cached;
+                    } else {
+                        log.warn("No cached data for {}", KEY);
+                        return JsonUtils.errorJson(KEY, throwable.getMessage());
+                    }
                 });
     }
 
