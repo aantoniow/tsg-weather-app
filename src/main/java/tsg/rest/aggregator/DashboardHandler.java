@@ -1,5 +1,8 @@
 package tsg.rest.aggregator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,32 +15,39 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 
+import tools.jackson.databind.ObjectMapper;
+import tsg.rest.aggregator.restclient.WebPath;
+
 public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    private static final Logger log = LoggerFactory.getLogger(DashboardHandler.class);
+    public final AggregateService aggregateService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public final ApiAggregator aggregator;
-
-    public DashboardHandler(ApiAggregator aggregator) {
-        this.aggregator = aggregator;
+    public DashboardHandler(AggregateService aggregateService) {
+        this.aggregateService = aggregateService;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext context, FullHttpRequest request) throws Exception {
-        if (!request.uri().equals("/api/dashboard") || !request.method().equals(HttpMethod.GET)) {
+        if (!request.uri().equals(WebPath.ENDPOINT) || !request.method().equals(HttpMethod.GET)) {
             sendResponse(context, HttpResponseStatus.NOT_FOUND, "Not Found");
             return;
         }
 
-        // Launch async aggregation without blocking
-        aggregator.aggregateData()
-                .whenComplete((result, throwable) -> {
-                    context.executor().execute(() -> {
-                        if (throwable != null) {
-                            sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                                    "{\"error\":\"" + throwable.getMessage() + "\"}");
-                        } else {
-                            sendResponse(context, HttpResponseStatus.OK, result);
-                        }
-                    });
+        aggregateService.getAggregatedData()
+                .thenAccept(aggregate -> {
+                    try {
+                        String json = objectMapper.writeValueAsString(aggregate);
+                        sendResponse(context, HttpResponseStatus.OK, json);
+                    } catch (Exception e) {
+                        log.error("JSON serialization failed", e);
+                        sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("Aggregation failed", ex);
+                    sendResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
+                    return null;
                 });
     }
 
@@ -49,12 +59,6 @@ public class DashboardHandler extends SimpleChannelInboundHandler<FullHttpReques
         response.headers().set("Content-Length", response.content().readableBytes());
 
         context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
-        cause.printStackTrace();
-        context.close();
     }
 
 }

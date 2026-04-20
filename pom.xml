@@ -73,6 +73,11 @@
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.5.8</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -127,7 +132,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>tsg.rest.aggregator.NettyServer</mainClass>
+              <mainClass>tsg.NettyServer</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
