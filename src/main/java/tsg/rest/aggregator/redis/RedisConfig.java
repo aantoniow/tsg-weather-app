@@ -8,7 +8,7 @@ import io.lettuce.core.api.StatefulRedisConnection;
 
 public class RedisConfig {
     private final RedisClient redisClient;
-    public final StatefulRedisConnection<String, String> connection;
+    private final StatefulRedisConnection<String, String> connection;
 
     public RedisConfig() {
         String host = System.getenv().getOrDefault("REDIS_HOST", "redis");
