@@ -14,8 +14,6 @@ services:
       - redis
     ports:
       - "8080:8080"
-      - "5005:5005"
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005

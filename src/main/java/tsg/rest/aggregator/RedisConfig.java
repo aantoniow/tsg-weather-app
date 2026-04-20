@@ -1,4 +1,4 @@
-package tsg.rest.aggregator.redis;
+package tsg.rest.aggregator;
 
 import java.time.Duration;
 
@@ -27,6 +27,16 @@ public class RedisConfig {
 
     public StatefulRedisConnection<String, String> getConnection() {
         return connection;
+    }
+
+    public void close() {
+        try {
+            if (connection != null)
+                connection.close();
+        } finally {
+            if (redisClient != null)
+                redisClient.shutdown();
+        }
     }
 
     private final Duration timeoutLimit = Duration.ofSeconds(5);

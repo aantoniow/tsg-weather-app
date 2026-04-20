@@ -1,7 +1,4 @@
-package tsg;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package tsg.rest.aggregator;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -16,23 +13,19 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 
-import tsg.rest.aggregator.AggregateService;
-import tsg.rest.aggregator.DashboardHandler;
-import tsg.rest.aggregator.restclient.FetcherService;
-
 public class NettyServer {
 
-    private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
     private final int port;
-    private final AggregateService aggregateService;
+    private final ApiAggregator aggregator;
 
     public NettyServer(int port) {
-        FetcherService fetcherService = new FetcherService();
         this.port = port;
-        this.aggregateService = new AggregateService(fetcherService);
+        this.aggregator = ApiAggregator.getInstance();
     }
 
     void run() throws Exception {
+        // konfiguracja grup wątków: bossGroup do akceptowania połączeń, workerGroup do
+        // obsługi
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -47,16 +40,17 @@ public class NettyServer {
                                     new HttpServerExpectContinueHandler(),
                                     new HttpObjectAggregator(64 * 1024),
                                     new HttpContentCompressor(),
-                                    new DashboardHandler(aggregateService));
+                                    new DashboardHandler(aggregator));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
+            // bind i start servera
             ChannelFuture f = bootstrap.bind(port).sync();
-            log.debug("Netty server initialised on port {}", port);
+            System.out.println("Netty server initialised on port " + port);
 
-            // w8 server for server closeed
+            // czekaj na zamknięcie serwera
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
